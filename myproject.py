@@ -12,9 +12,9 @@ from sklearn.metrics import mean_squared_error
 st.set_page_config(layout="wide")
 
 # ---------- CONFIGURATION ----------
-API_KEY = "pp9o7Z8QzIpy05pZj5dg6cYwyx5yMzLs"  # Tomorrow.io API Key
+API_KEY = "a93063961d6ba847cdae4c0a59ec93c4"
 LAT, LON = 13.0827, 80.2707  # Tamil Nadu
-file_path = r"C:\Users\AKHILASHREE\Desktop\POWERGRID\PROJECT_DATASET.xlsx"
+file_path = "PROJECT_DATASET.xlsx"
 
 # ---------- FUNCTIONS ----------
 @st.cache_data
@@ -23,14 +23,16 @@ def load_data(path):
     return df
 
 def get_weather_data(lat, lon, api_key):
-    url = f"https://api.tomorrow.io/v4/weather/forecast?location={lat},{lon}&apikey={api_key}"
+    url = f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
     res = requests.get(url)
     data = res.json()
     try:
-        interval = data["timelines"]["hourly"][0]["values"]
-        return interval["temperature"], interval["humidity"], interval["windSpeed"]
+        temp = data["main"]["temp"]
+        humidity = data["main"]["humidity"]
+        wind_speed = data["wind"]["speed"] * 3.6  # Convert from m/s to km/h
+        return temp, humidity, wind_speed
     except KeyError:
-        raise ValueError("Unexpected API response structure")
+        raise ValueError("Unexpected OpenWeatherMap response structure")
 
 # ---------- LOAD AND CLEAN ----------
 data = load_data(file_path)
